@@ -1,5 +1,6 @@
 rootProject.name = "chaoscraft"
-include(":chaoscraft-mod")
+include("chaoscraft-mod")
+include("chaoscraft-control-center")
 
 pluginManagement {
     repositories {

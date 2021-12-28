@@ -22,7 +22,7 @@ There are several parts in this project:
 
 ### chaoscraft-mod
 
-chaoscraft-mod is a (serverside) mod for minecraft, it provides 
+chaoscraft-mod is a (serverside) mod for minecraft, it provides
 
 - mapping kubernetes workloads to minecraft entities.
 - show communication(network traffic) between entities.
@@ -30,4 +30,5 @@ chaoscraft-mod is a (serverside) mod for minecraft, it provides
 
 ### chaoscraft-control-center
 
-chaoscraft-control-center is the bridge between chaoscraft-mod and kubernetes. It grabs data from kubernetes API and cilium hubble.
+chaoscraft-control-center is the bridge between chaoscraft-mod and kubernetes. It grabs data from kubernetes API and
+cilium hubble.

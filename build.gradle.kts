@@ -3,7 +3,7 @@ plugins {
     java
 }
 
-group = "org.example"
+group = "dev.strrl"
 version = "1.0-SNAPSHOT"
 
 repositories {
