@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "chaoscraft-mod",
+  "version": "${version}",
+  "name": "Chaoscraft Mod",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "Apache-2.0",
+  "icon": "assets/chaoscraft-mod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "dev.strrl.chaoscraftmod.client.ChaoscraftModClientKt::init"
+    ],
+    "main": [
+      "dev.strrl.chaoscraftmod.ChaoscraftMod"
+    ]
+  },
+  "mixins": [
+    "chaoscraft-mod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "fabric": "*",
+    "fabric-language-kotlin": "*",
+    "minecraft": "1.17.1"
+  }
+}
