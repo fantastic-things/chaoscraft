@@ -1,3 +1,9 @@
 package dev.strrl.chaoscraft.grabber
 
-interface ResourceUsageGrabber {}
+import dev.strrl.chaoscraft.api.ResourceUsage
+import dev.strrl.chaoscraft.api.Workload
+
+interface ResourceUsageGrabber {
+    fun allResourceUsage(): List<Pair<Workload, List<ResourceUsage>>>
+    fun resourceUsageAbout(workload: Workload): List<ResourceUsage>
+}
