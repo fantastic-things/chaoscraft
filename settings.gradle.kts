@@ -1,6 +1,7 @@
 rootProject.name = "chaoscraft"
 include("chaoscraft-mod")
 include("chaoscraft-control-center")
+include("chaoscraft-datasource")
 include("chaoscraft-api")
 
 pluginManagement {
