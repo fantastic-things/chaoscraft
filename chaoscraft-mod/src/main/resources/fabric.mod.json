@@ -11,10 +11,9 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "dev.strrl.chaoscraftmod.client.ChaoscraftModClientKt::init"
     ],
     "main": [
-      "dev.strrl.chaoscraftmod.ChaoscraftMod"
+      "dev.strrl.chaoscraftmod.client.ChaoscraftModClientKt::init"
     ]
   },
   "mixins": [

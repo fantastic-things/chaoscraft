@@ -1,9 +1,11 @@
 package dev.strrl.chaoscraftmod.client
 
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
+import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.minecraft.block.Block
 import net.minecraft.block.Material
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
@@ -13,6 +15,7 @@ import net.minecraft.util.registry.Registry
 
 val FABRIC_ITEM = Item(FabricItemSettings().group(ItemGroup.MISC))
 val PLAYGROUND_BEACON_BLOCK: Block = PlaygroundBeaconBlock(FabricBlockSettings.of(Material.STONE).hardness(4.0f))
+var PLAYGROUND_BEACON_BLOCK_ENTITY: BlockEntityType<PlaygroundBeaconBlockEntity>? = null
 
 @Suppress("unused")
 fun init() {
@@ -34,6 +37,11 @@ fun init() {
             PLAYGROUND_BEACON_BLOCK,
             Item.Settings().group(ItemGroup.MISC)
         )
+    )
+    PLAYGROUND_BEACON_BLOCK_ENTITY = Registry.register(
+        Registry.BLOCK_ENTITY_TYPE,
+        "chaoscraft:playground_beacon_entity",
+        FabricBlockEntityTypeBuilder.create(::PlaygroundBeaconBlockEntity, PLAYGROUND_BEACON_BLOCK).build(null)
     )
 }
 
