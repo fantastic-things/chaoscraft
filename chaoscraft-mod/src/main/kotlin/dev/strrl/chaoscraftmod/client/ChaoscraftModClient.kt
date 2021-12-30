@@ -1,11 +1,15 @@
 package dev.strrl.chaoscraftmod.client
 
+import kotlinx.coroutines.Dispatchers
 import net.fabricmc.fabric.api.`object`.builder.v1.block.FabricBlockSettings
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
+import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry.INSTANCE
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings
 import net.minecraft.block.Block
 import net.minecraft.block.Material
 import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
@@ -38,5 +42,9 @@ fun init() {
         Registry.BLOCK_ENTITY_TYPE, "tutorial:demo_block_entity",
         FabricBlockEntityTypeBuilder.create({ pos, state -> DemoBlockEntity(pos, state) }, FABRIC_BLOCK).build(null)
     )
+
+    //BlockEntityRendererRegistry.INSTANCE.register(DEMO_BLOCK_ENTITY, DemoBlockEntityRenderer::new)
+
+    BlockEntityRendererRegistry.register(DEMO_BLOCK_ENTITY, ::DemoBlockEntityRenderer)
 }
 
