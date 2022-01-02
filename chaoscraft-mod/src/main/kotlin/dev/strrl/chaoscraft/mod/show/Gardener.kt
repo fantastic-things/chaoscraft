@@ -24,6 +24,7 @@ class Gardener(
 ) : CoroutineScope {
 
     private val rateLimiter = RateLimiter.create(0.5);
+    private val actionFactory = ServerWorldsActionFactory(serverWorld)
     private var entityCache: GardenBeaconBlockEntity? = null
 
     companion object {
@@ -38,9 +39,11 @@ class Gardener(
             restoreEntity()
 
             launch {
+                val actions: MutableList<Action> = mutableListOf()
                 syncDataFromKubernetes()
                 cleanupUnexpectedDiedEntities()
-                prepareGarden()
+                actions.addAll(prepareGarden())
+                ActionWorker.dispatch(actions)
             }
         }
     }
@@ -55,20 +58,22 @@ class Gardener(
         return entityCache!!
     }
 
-    private fun cleanupUnexpectedDiedEntities() {
+    private fun cleanupUnexpectedDiedEntities(): List<Action> {
+        val result = mutableListOf<Action>()
         val originState = fetchEntity().state
         val mapped = originState.controlledEntityIds.map { Pair(it, this.serverWorld.getEntity(it)) }
 
         val notExistedAnymore = mapped.filter { it.second == null }
 
         val diedUnexpected = mapped.toSet().filter { it.second != null }.filter { !it.second!!.isAlive }
-        diedUnexpected.forEach { removeEntity(it.second!!) }
+        diedUnexpected.forEach { result.add(actionFactory.removeEntityFromWorld(it.second!!)) }
 
         val after = originState.controlledEntityIds.toMutableSet()
         after.removeAll(notExistedAnymore.map { it.first }.toSet())
         after.removeAll(diedUnexpected.map { it.first }.toSet())
 
         fetchEntity().state = originState.copy(controlledEntityIds = after)
+        return result
     }
 
     private fun syncDataFromKubernetes() {
@@ -82,7 +87,8 @@ class Gardener(
         }
     }
 
-    private fun prepareGarden() {
+    private fun prepareGarden(): List<Action> {
+        val result: MutableList<Action> = mutableListOf()
         val state = fetchEntity().state
         val entities = state.controlledEntityIds.map { this.serverWorld.getEntity(it)!! }
         val workloads = state.workloads
@@ -106,11 +112,16 @@ class Gardener(
         val newSpawnedControllerEntities = workloadNeedToSpawn.map {
             spawnWorkload(it)
         }.toSet()
-        val killedEntities = entityNeedToRemove.stream().peek { it.kill() }.peek { removeEntity(it) }.toList().toSet()
+        val killedEntities =
+            entityNeedToRemove.stream()
+                .peek { result.add(actionFactory.killEntity(it)) }
+                .peek { result.add(actionFactory.removeEntityFromWorld(it)) }
+                .toList().toSet()
         val newEntities = entities.toMutableSet()
         newEntities.removeAll(killedEntities)
         newEntities.addAll(newSpawnedControllerEntities)
         fetchEntity().state = state.copy(controlledEntityIds = newEntities.map { it.uuid }.toSet())
+        return result
     }
 
     private fun spawnWorkload(workload: Workload): Entity {
@@ -122,10 +133,6 @@ class Gardener(
         sheep.customName = Text.of(workload.namespacedName())
         serverWorld.spawnEntity(sheep)
         return sheep
-    }
-
-    fun removeEntity(entity: Entity) {
-        entity.remove(Entity.RemovalReason.DISCARDED)
     }
 
     override val coroutineContext: CoroutineContext

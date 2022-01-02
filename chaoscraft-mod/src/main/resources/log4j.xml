@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" packages="com.mojang.util,net.minecrell.terminalconsole.util">
+<Configuration status="WARN" packages="com.mojang.util,net.minecrell.terminalconsole.util" monitorInterval="5">
     <Appenders>
 
         <!--	System out	-->
@@ -58,6 +58,8 @@
     <Loggers>
         <Logger level="${sys:fabric.log.level:-info}" name="net.minecraft"/>
         <Logger level="trace" name="dev.strrl"/>
+        <Logger level="info" name="okhttp3.internal.platform.Platform"/>
+        <Logger level="info" name="io.fabric8.kubernetes"/>
         <Root level="all">
             <AppenderRef ref="DebugFile" level="trace"/>
             <AppenderRef ref="SysOut" level="${sys:fabric.log.level:-info}"/>
