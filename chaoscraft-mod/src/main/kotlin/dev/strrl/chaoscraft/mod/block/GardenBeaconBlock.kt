@@ -1,7 +1,8 @@
 package dev.strrl.chaoscraft.mod.block
 
-import dev.strrl.chaoscraft.mod.show.Gardens
-import dev.strrl.chaoscraft.mod.show.Position
+import dev.strrl.chaoscraft.mod.show.Gardeners
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
 import net.minecraft.block.BlockState
@@ -11,17 +12,19 @@ import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import org.slf4j.LoggerFactory
+import kotlin.coroutines.CoroutineContext
 
 /**
  * [GardenBeaconBlock] introduce the base position of chaoscraft playground.
  */
-class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider {
+class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider, CoroutineScope {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Synchronized
@@ -38,25 +41,31 @@ class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider
         if (world.isClient) {
             return ActionResult.SUCCESS
         }
-        Gardens.registration(
-            Position(
-                pos.x, pos.y, pos.z
-            ),
-            world,
-        )
         return ActionResult.SUCCESS
+    }
+
+    override fun neighborUpdate(
+        state: BlockState?, world: World, pos: BlockPos, block: Block, fromPos: BlockPos, notify: Boolean
+    ) {
+        val redstoneSignal = world.isReceivingRedstonePower(pos)
+        if (redstoneSignal) {
+            onRedstoneSignal(world, pos)
+        }
+    }
+
+    private fun onRedstoneSignal(world: World, pos: BlockPos) {
+        logger.debug("onRedstoneSignal, world: {}, position: {}", world, pos)
+        if (!world.isClient) {
+            Gardeners.acquireForBlock(
+                world as ServerWorld,
+                pos,
+            ).work()
+        }
     }
 
     override fun onBreak(world: World, pos: BlockPos, state: BlockState?, player: PlayerEntity?) {
         super.onBreak(world, pos, state, player)
         logger.debug("PlaygroundBeaconBlock broken at $pos")
-        if (!world.isClient()) {
-            Gardens.unregistration(
-                Position(
-                    pos.x, pos.y, pos.z
-                )
-            )
-        }
     }
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity {
@@ -68,5 +77,8 @@ class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider
     ): BlockEntityTicker<T>? {
         return super.getTicker(world, state, type)
     }
+
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main
 }
 
