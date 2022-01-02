@@ -27,6 +27,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabricVersion")
     val fabricKotlinVersion: String by project
     modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
+    api(project(":chaoscraft-api"))
+    api(project(":chaoscraft-datasource"))
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17
