@@ -29,6 +29,12 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
     api(project(":chaoscraft-api"))
     api(project(":chaoscraft-datasource"))
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt"){
+        version {
+            strictly("1.6.0-native-mt")
+        }
+    }
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 }
 tasks {
     val javaVersion = JavaVersion.VERSION_17
