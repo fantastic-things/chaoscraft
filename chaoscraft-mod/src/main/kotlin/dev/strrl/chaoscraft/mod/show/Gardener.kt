@@ -1,5 +1,6 @@
 package dev.strrl.chaoscraft.mod.show
 
+import com.google.common.util.concurrent.RateLimiter
 import dev.strrl.chaoscraft.api.Workload
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
 import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
@@ -7,6 +8,7 @@ import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.launch
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.server.world.ServerWorld
@@ -15,22 +17,42 @@ import net.minecraft.util.math.BlockPos
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("UnstableApiUsage")
 class Gardener(
     private val serverWorld: ServerWorld,
     private val beaconBlockPos: BlockPos,
 ) : CoroutineScope {
 
+    private val rateLimiter = RateLimiter.create(0.5);
+    private var entityCache: GardenBeaconBlockEntity? = null
+
+    companion object {
+        private val workerPool = Executors.newWorkStealingPool().asCoroutineDispatcher()
+    }
+
     /**
      * main entry of the gardener
      */
     fun work() {
-        syncDataFromKubernetes()
-        cleanupUnexpectedDiedEntities()
-        prepareGarden()
+        if (rateLimiter.tryAcquire()) {
+            restoreEntity()
+
+            launch {
+                syncDataFromKubernetes()
+                cleanupUnexpectedDiedEntities()
+                prepareGarden()
+            }
+        }
+    }
+
+    private fun restoreEntity() {
+        // notice that: you could only call the getBlockEntity() method within the thread already registered in this
+        // serverWorld.thread
+        entityCache = serverWorld.getBlockEntity(beaconBlockPos, ChaoscraftEntityType.GARDEN_BEACON_BLOCK_ENTITY).get()
     }
 
     private fun fetchEntity(): GardenBeaconBlockEntity {
-        return serverWorld.getBlockEntity(beaconBlockPos, ChaoscraftEntityType.GARDEN_BEACON_BLOCK_ENTITY).get()
+        return entityCache!!
     }
 
     private fun cleanupUnexpectedDiedEntities() {
@@ -111,26 +133,4 @@ class Gardener(
 
 }
 
-private val workerPool = Executors.newWorkStealingPool().asCoroutineDispatcher()
 
-class Gardeners {
-    companion object {
-
-        private val controlledGardeners: MutableMap<Position, Gardener> = mutableMapOf()
-
-        fun acquireForBlock(
-            serverWorld: ServerWorld,
-            beaconBlockPos: BlockPos,
-        ): Gardener {
-            return synchronized(
-                this
-            ) {
-                controlledGardeners.computeIfAbsent(
-                    Position(beaconBlockPos.x, beaconBlockPos.y, beaconBlockPos.z)
-                ) {
-                    Gardener(serverWorld, beaconBlockPos)
-                }
-            }
-        }
-    }
-}
