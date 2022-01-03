@@ -1,7 +1,6 @@
 package dev.strrl.chaoscraft.mod.block
 
 import dev.strrl.chaoscraft.mod.show.Gardeners
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import net.minecraft.block.Block
 import net.minecraft.block.BlockEntityProvider
@@ -24,7 +23,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * [GardenBeaconBlock] introduce the base position of chaoscraft playground.
  */
-class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider, CoroutineScope {
+class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Synchronized
@@ -77,8 +76,5 @@ class GardenBeaconBlock(setting: Settings) : Block(setting), BlockEntityProvider
     ): BlockEntityTicker<T>? {
         return super.getTicker(world, state, type)
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main
 }
 
