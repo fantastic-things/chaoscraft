@@ -1,18 +1,14 @@
 package dev.strrl.chaoscraft.mod.show
 
 import com.google.common.util.concurrent.RateLimiter
-import dev.strrl.chaoscraft.api.Workload
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
 import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.launch
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityType
 import net.minecraft.server.world.ServerWorld
-import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
@@ -37,14 +33,12 @@ class Gardener(
     fun work() {
         if (rateLimiter.tryAcquire()) {
             restoreEntity()
-
-            launch {
-                val actions: MutableList<Action> = mutableListOf()
-                syncDataFromKubernetes()
-                cleanupUnexpectedDiedEntities()
-                actions.addAll(prepareGarden())
-                ActionWorker.dispatch(actions)
-            }
+            val actions: MutableList<Action> = mutableListOf()
+            syncDataFromKubernetes()
+            actions.addAll(cleanupUnexpectedDiedEntities())
+            actions.addAll(removeDeletedEntities())
+            actions.addAll(spawnNewEntities())
+            actions.forEach { it.run() }
         }
     }
 
@@ -58,6 +52,23 @@ class Gardener(
         return entityCache!!
     }
 
+    /**
+     * update workloads data from kubernetes
+     */
+    private fun syncDataFromKubernetes() {
+        val originState = fetchEntity().state
+
+        val originWorkloads = originState.workloads
+        val newWorkloads = KubePodsGrabber(DefaultKubernetesClient()).listWorkloadsInNamespace("default").toSet()
+
+        if (originWorkloads != newWorkloads) {
+            fetchEntity().state = originState.copy(workloads = newWorkloads)
+        }
+    }
+
+    /**
+     * cleanup entities that were killed unexpectedly
+     */
     private fun cleanupUnexpectedDiedEntities(): List<Action> {
         val result = mutableListOf<Action>()
         val originState = fetchEntity().state
@@ -76,42 +87,21 @@ class Gardener(
         return result
     }
 
-    private fun syncDataFromKubernetes() {
-        val originState = fetchEntity().state
-
-        val originWorkloads = originState.workloads
-        val newWorkloads = KubePodsGrabber(DefaultKubernetesClient()).listWorkloadsInNamespace("default").toSet()
-
-        if (originWorkloads != newWorkloads) {
-            fetchEntity().state = originState.copy(workloads = newWorkloads)
-        }
-    }
-
-    private fun prepareGarden(): List<Action> {
+    /**
+     * remove entities that are not introduced in the workloads
+     */
+    private fun removeDeletedEntities(): List<Action> {
         val result: MutableList<Action> = mutableListOf()
         val state = fetchEntity().state
         val entities = state.controlledEntityIds.map { this.serverWorld.getEntity(it)!! }
         val workloads = state.workloads
-
-        val workloadNeedToSpawn: MutableList<Workload> = mutableListOf()
         val entityNeedToRemove: MutableList<Entity> = mutableListOf()
-
-        val customNameEntityMapping = entities.associateBy { it.customName?.string ?: "" }
-        for (workload in workloads) {
-            if (!customNameEntityMapping.containsKey(workload.namespacedName())) {
-                workloadNeedToSpawn.add(workload)
-            }
-        }
         val namespacedNameWorkloadMapping = workloads.associateBy { it.namespacedName() }
         for (entity in entities) {
             if (!namespacedNameWorkloadMapping.containsKey(entity.customName?.string ?: "")) {
                 entityNeedToRemove.add(entity)
             }
         }
-
-        val newSpawnedControllerEntities = workloadNeedToSpawn.map {
-            spawnWorkload(it)
-        }.toSet()
         val killedEntities =
             entityNeedToRemove.stream()
                 .peek { result.add(actionFactory.killEntity(it)) }
@@ -119,21 +109,36 @@ class Gardener(
                 .toList().toSet()
         val newEntities = entities.toMutableSet()
         newEntities.removeAll(killedEntities)
-        newEntities.addAll(newSpawnedControllerEntities)
         fetchEntity().state = state.copy(controlledEntityIds = newEntities.map { it.uuid }.toSet())
         return result
     }
 
-    private fun spawnWorkload(workload: Workload): Entity {
-        val sheep = EntityType.SHEEP.create(serverWorld)!!
-        sheep.setPos(
-            this.beaconBlockPos.x.toDouble(), ((this.beaconBlockPos.y + 3).toDouble()), this.beaconBlockPos.z.toDouble()
+    /**
+     * spawn new entities for new-created workloads
+     */
+    private fun spawnNewEntities(): List<Action> {
+        val result: MutableList<Action> = mutableListOf()
+        val state = fetchEntity().state
+        val customNameEntityMapping =
+            state.controlledEntityIds
+                .map { serverWorld.getEntity(it)!! }
+                .associateBy { it.customName?.string ?: "" }
+        val workloadNeedToSpawn = state.workloads.filter { !customNameEntityMapping.containsKey(it.namespacedName()) }
+
+        result.add(
+            actionFactory.spawnEntityForWorkloads(
+                fetchEntity(),
+                workloadNeedToSpawn,
+                Position(
+                    this.beaconBlockPos.x,
+                    this.beaconBlockPos.y + 2,
+                    this.beaconBlockPos.z
+                )
+            )
         )
-        sheep.isCustomNameVisible = true
-        sheep.customName = Text.of(workload.namespacedName())
-        serverWorld.spawnEntity(sheep)
-        return sheep
+        return result
     }
+
 
     override val coroutineContext: CoroutineContext
         get() = workerPool
