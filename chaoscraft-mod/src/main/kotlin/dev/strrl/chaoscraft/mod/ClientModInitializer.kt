@@ -11,4 +11,3 @@ fun initClient() {
         ::WorkloadSheepEntityRenderer
     )
 }
-

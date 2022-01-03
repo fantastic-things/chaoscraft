@@ -4,6 +4,10 @@ import com.google.common.util.concurrent.RateLimiter
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
 import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
+import dev.strrl.chaoscraft.mod.show.zone.ApplyZoneActions
+import dev.strrl.chaoscraft.mod.show.zone.CompositeZone
+import dev.strrl.chaoscraft.mod.show.zone.FenceBorder
+import dev.strrl.chaoscraft.mod.show.zone.FlatFloor
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -35,11 +39,33 @@ class Gardener(
             restoreEntity()
             val actions: MutableList<Action> = mutableListOf()
             syncDataFromKubernetes()
+
             actions.addAll(cleanupUnexpectedDiedEntities())
-            actions.addAll(removeDeletedEntities())
-            actions.addAll(spawnNewEntities())
+            actions.addAll(removeEntitiesForUnexistedWorkloads())
+
+            actions.addAll(preparePlayground())
+
+            actions.addAll(spawnNewEntitiesForNotIntroducedWorkloads())
+
             actions.forEach { it.run() }
         }
+    }
+
+    private fun preparePlayground(): List<Action> {
+        val size = 20
+        val offset = -size / 2
+
+        val floor = FlatFloor(
+            size, size
+        ).withOffset(Position(2, -1, offset))
+
+        val fence = FenceBorder(
+            size, size
+        ).withOffset(Position(2, 0, offset))
+        val zone = CompositeZone(listOf(floor, fence))
+        return ApplyZoneActions(
+            serverWorld, Position.fromBlockPos(beaconBlockPos), zone
+        ).actions()
     }
 
     private fun restoreEntity() {
@@ -90,7 +116,7 @@ class Gardener(
     /**
      * remove entities that are not introduced in the workloads
      */
-    private fun removeDeletedEntities(): List<Action> {
+    private fun removeEntitiesForUnexistedWorkloads(): List<Action> {
         val result: MutableList<Action> = mutableListOf()
         val state = fetchEntity().state
         val entities = state.controlledEntityIds.map { this.serverWorld.getEntity(it)!! }
@@ -102,41 +128,33 @@ class Gardener(
                 entityNeedToRemove.add(entity)
             }
         }
-        val killedEntities =
-            entityNeedToRemove.stream()
-                .peek { result.add(actionFactory.killEntity(it)) }
-                .peek { result.add(actionFactory.removeEntityFromWorld(it)) }
-                .toList().toSet()
-        val newEntities = entities.toMutableSet()
-        newEntities.removeAll(killedEntities)
-        fetchEntity().state = state.copy(controlledEntityIds = newEntities.map { it.uuid }.toSet())
+        entityNeedToRemove.stream().peek { result.add(actionFactory.killEntity(it)) }.toList().toSet()
+
         return result
     }
 
     /**
      * spawn new entities for new-created workloads
      */
-    private fun spawnNewEntities(): List<Action> {
+    private fun spawnNewEntitiesForNotIntroducedWorkloads(): List<Action> {
         val result: MutableList<Action> = mutableListOf()
         val state = fetchEntity().state
         val customNameEntityMapping =
-            state.controlledEntityIds
-                .map { serverWorld.getEntity(it)!! }
-                .associateBy { it.customName?.string ?: "" }
+            state.controlledEntityIds.map { serverWorld.getEntity(it)!! }.associateBy { it.customName?.string ?: "" }
         val workloadNeedToSpawn = state.workloads.filter { !customNameEntityMapping.containsKey(it.namespacedName()) }
 
         result.add(
             actionFactory.spawnEntityForWorkloads(
-                fetchEntity(),
-                workloadNeedToSpawn,
-                Position(
-                    this.beaconBlockPos.x,
-                    this.beaconBlockPos.y + 2,
-                    this.beaconBlockPos.z
-                )
+                fetchEntity(), workloadNeedToSpawn, spawnPosition()
             )
         )
         return result
+    }
+
+    private fun spawnPosition(): Position {
+        return Position(
+            this.beaconBlockPos.x + 9, this.beaconBlockPos.y + 1, this.beaconBlockPos.z
+        )
     }
 
 

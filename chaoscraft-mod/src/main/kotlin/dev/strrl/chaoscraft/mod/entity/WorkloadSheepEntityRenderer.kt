@@ -8,14 +8,12 @@ import net.minecraft.util.Identifier
 
 class WorkloadSheepEntityRenderer(
     context: EntityRendererFactory.Context,
-) :
-    MobEntityRenderer<WorkloadSheepEntity, SheepEntityModel<WorkloadSheepEntity>>(
-        context,
-        SheepEntityModel<WorkloadSheepEntity>(context.getPart(EntityModelLayers.SHEEP)),
-        0.7f
-    ) {
+) : MobEntityRenderer<WorkloadSheepEntity, SheepEntityModel<WorkloadSheepEntity>>(
+    context, SheepEntityModel<WorkloadSheepEntity>(context.getPart(EntityModelLayers.SHEEP)), 0.7f
+) {
 
     init {
+        addFeature(WorkloadSheepWoolFeatureRenderer(this, context.modelLoader))
     }
 
     private val texture = Identifier("textures/entity/sheep/sheep.png")
