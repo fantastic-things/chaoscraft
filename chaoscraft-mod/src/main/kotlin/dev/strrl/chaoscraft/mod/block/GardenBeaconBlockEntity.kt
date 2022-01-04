@@ -3,7 +3,7 @@ package dev.strrl.chaoscraft.mod.block
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import dev.strrl.chaoscraft.api.Workload
-import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
+import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.block.BlockState
 import net.minecraft.block.entity.BlockEntity
