@@ -1,5 +1,7 @@
 package dev.strrl.chaoscraft.mod.entity
 
+import dev.strrl.chaoscraft.mod.show.MemoryRender
+import dev.strrl.chaoscraft.mod.show.UsageRender
 import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.entity.EntityRendererFactory
 import net.minecraft.client.render.entity.MobEntityRenderer
@@ -36,22 +38,25 @@ class WorkloadSheepEntityRenderer(
     ) {
         super.render(entity, f, g, matrixStack, vertexConsumerProvider, light)
 
-
-        val anotherText = Text.of("I am going to sleep").copy()
-        anotherText.style = Style.EMPTY.withColor(0x4299f5).withBold(true)
-        matrixStack.push()
-        matrixStack.translate(0.0, 0.25, 0.0)
-        renderLabelIfPresent(entity, anotherText, matrixStack, vertexConsumerProvider, light)
-        matrixStack.pop()
-
         // 0.1
         val usagePercentage = entity.cpuUsage / entity.cpuCapacity
-        val text = Text.of("CPU: [|||||      ] 30%").copy()
-        text.style = Style.EMPTY.withColor(0xf55a42).withBold(true)
+        val usageRender = UsageRender("usage",0.59)
+        val usageText = usageRender.render()
+        val text = Text.of(usageText).copy()
+        text.style = Style.EMPTY.withColor(0xe0766e).withBold(true).withFormatting()
         matrixStack.push()
         matrixStack.translate(0.0, 0.5, 0.0)
         renderLabelIfPresent(entity, text, matrixStack, vertexConsumerProvider, light)
         matrixStack.pop()
 
+        val memoryPercentage = entity.memoryUsage / entity.memoryCapacity
+        val memoryRender = MemoryRender("memory",0.35)
+        val memoryText = memoryRender.render()
+        val anotherText = Text.of(memoryText).copy()
+        anotherText.style = Style.EMPTY.withColor(0x6e94e0).withBold(true)
+        matrixStack.push()
+        matrixStack.translate(0.0, 0.25, 0.0)
+        renderLabelIfPresent(entity, anotherText, matrixStack, vertexConsumerProvider, light)
+        matrixStack.pop()
     }
 }

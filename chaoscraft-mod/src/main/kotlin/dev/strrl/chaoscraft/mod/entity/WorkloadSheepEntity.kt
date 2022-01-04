@@ -13,6 +13,8 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
 
     val cpuUsage: Double = 10.0
     val cpuCapacity: Double = 100.0
+    val memoryUsage: Double = 10.0
+    val memoryCapacity: Double = 100.0
 
 
 }
