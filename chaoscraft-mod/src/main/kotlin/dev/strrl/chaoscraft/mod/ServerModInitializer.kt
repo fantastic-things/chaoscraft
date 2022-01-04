@@ -36,7 +36,7 @@ fun initServer() {
         FabricEntityTypeBuilder.create(
             SpawnGroup.CREATURE,
             ::WorkloadSheepEntity,
-        ).dimensions(EntityDimensions.fixed(0.75f, 0.75f)).build()
+        ).dimensions(EntityDimensions.fixed(0.9f, 1.3f)).build()
     )
     FabricDefaultAttributeRegistry.register(
         ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY,

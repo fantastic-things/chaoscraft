@@ -2,7 +2,6 @@ package dev.strrl.chaoscraft.mod.entity
 
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.passive.SheepEntity
-import net.minecraft.text.Text
 import net.minecraft.world.World
 
 class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World?) : SheepEntity(
@@ -12,11 +11,8 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
         return true
     }
 
-    override fun hasCustomName(): Boolean {
-        return true
-    }
+    val cpuUsage: Double = 10.0
+    val cpuCapacity: Double = 100.0
 
-    override fun getCustomName(): Text? {
-        return Text.of("i am \r\n </br>bad sheep \r\n")
-    }
+
 }
