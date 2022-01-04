@@ -38,9 +38,8 @@ class WorkloadSheepEntityRenderer(
     ) {
         super.render(entity, f, g, matrixStack, vertexConsumerProvider, light)
 
-        // 0.1
         val usagePercentage = entity.cpuUsage / entity.cpuCapacity
-        val usageRender = UsageRender("usage",0.59)
+        val usageRender = UsageRender("usage",usagePercentage)
         val usageText = usageRender.render()
         val text = Text.of(usageText).copy()
         text.style = Style.EMPTY.withColor(0xe0766e).withBold(true).withFormatting()
@@ -50,7 +49,7 @@ class WorkloadSheepEntityRenderer(
         matrixStack.pop()
 
         val memoryPercentage = entity.memoryUsage / entity.memoryCapacity
-        val memoryRender = MemoryRender("memory",0.35)
+        val memoryRender = MemoryRender("memory",memoryPercentage)
         val memoryText = memoryRender.render()
         val anotherText = Text.of(memoryText).copy()
         anotherText.style = Style.EMPTY.withColor(0x6e94e0).withBold(true)
