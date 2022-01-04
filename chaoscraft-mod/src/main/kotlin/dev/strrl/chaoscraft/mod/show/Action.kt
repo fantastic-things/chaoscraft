@@ -1,10 +1,10 @@
 package dev.strrl.chaoscraft.mod.show
 
 import dev.strrl.chaoscraft.api.Workload
+import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
 import net.minecraft.block.Block
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityType
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.text.Text
 import net.minecraft.util.math.BlockPos
@@ -29,7 +29,7 @@ class ServerWorldsActionFactory(
             override fun run() {
                 val spawnedEntities = mutableListOf<Entity>()
                 for (workload in workloads) {
-                    val sheep = EntityType.SHEEP.create(serverWorld)!!
+                    val sheep = ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY!!.create(serverWorld)!!
                     sheep.setPos(
                         spawnPosition.x.toDouble() + Random.nextDouble(-1.0, 1.0),
                         spawnPosition.y.toDouble() + Random.nextDouble(0.0, 1.0),
