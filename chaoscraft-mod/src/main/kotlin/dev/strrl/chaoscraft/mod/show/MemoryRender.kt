@@ -13,7 +13,7 @@ class MemoryRender(
         }
         if (memoryPercentage < 0.0) {
             val unused = " ".repeat(this.length)
-            return "$resourceName:[$unused] 0.0%"
+            return "$resourceName:[$unused] 0%"
         }
         val usedLength = (length * memoryPercentage).toInt()
         val unusedLength = length - usedLength
