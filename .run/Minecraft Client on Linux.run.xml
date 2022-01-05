@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Minecraft Client on Linux" type="Application" factoryName="Application">
+    <log_file alias="DebugLog" path="$PROJECT_DIR$/chaoscraft-mod/run/logs/debug.log" />
+    <option name="MAIN_CLASS_NAME" value="net.fabricmc.devlaunchinjector.Main" />
+    <module name="chaoscraft.chaoscraft-mod.main" />
+    <option name="VM_PARAMETERS" value="&quot;-Dfabric.dli.config=../.gradle/loom-cache/launch.cfg&quot; &quot;-Dfabric.dli.env=client&quot; &quot;-Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient&quot; &quot;-Dlog4j.configurationFile=$PROJECT_DIR$/chaoscraft-mod/src/main/resources/log4j.xml&quot;" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/chaoscraft-mod/run" />
+    <method v="2">
+      <option name="MakeProject" enabled="true" />
+    </method>
+  </configuration>
+</component>

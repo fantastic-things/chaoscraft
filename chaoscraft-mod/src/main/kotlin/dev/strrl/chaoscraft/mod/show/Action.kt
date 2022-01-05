@@ -1,8 +1,9 @@
 package dev.strrl.chaoscraft.mod.show
 
 import dev.strrl.chaoscraft.api.Workload
-import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
+import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
+import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
 import net.minecraft.block.Block
 import net.minecraft.entity.Entity
 import net.minecraft.server.world.ServerWorld
@@ -39,6 +40,10 @@ class ServerWorldsActionFactory(
                     sheep.customName = Text.of(workload.namespacedName())
                     serverWorld.spawnEntity(sheep)
                     spawnedEntities.add(sheep)
+
+                    // spawn network crystal for sheep
+                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 5.0))
+                    serverWorld.spawnEntity(networkCrystal)
                 }
 
                 val after = gardenBeaconBlockEntity.state.controlledEntityIds.toMutableSet()

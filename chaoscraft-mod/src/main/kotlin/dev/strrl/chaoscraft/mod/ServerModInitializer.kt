@@ -2,7 +2,11 @@ package dev.strrl.chaoscraft.mod
 
 import dev.strrl.chaoscraft.mod.armor.ChaoscraftArmors
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
+import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
+import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
 import dev.strrl.chaoscraft.mod.entity.WorkloadSheepEntity
+import dev.strrl.chaoscraft.mod.item.ChaoscraftItems
+import dev.strrl.chaoscraft.mod.item.NetworkCrystalItem
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricEntityTypeBuilder
@@ -14,16 +18,19 @@ import net.minecraft.item.*
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 
+private const val CHAOSCRAFT = "chaoscraft"
+
 val CHAOSCRAFT_MOD_GROUP: ItemGroup = FabricItemGroupBuilder.create(Identifier("chaoscraft", "items"))
     .icon { ItemStack(Items.TNT) }
     .build()
 
 fun initServer() {
     Registry.register(
-        Registry.BLOCK, Identifier("chaoscraft", "playground_beacon"), ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK
+        Registry.BLOCK, Identifier(CHAOSCRAFT, "playground_beacon"), ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK
     )
-    Registry.register(
-        Registry.ITEM, Identifier("chaoscraft", "playground_beacon"), BlockItem(
+
+    ChaoscraftItems.PLAYGROUND_BEACON_BLOCK = Registry.register(
+        Registry.ITEM, Identifier(CHAOSCRAFT, "playground_beacon"), BlockItem(
             ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK, Item.Settings().group(CHAOSCRAFT_MOD_GROUP)
         )
     )
@@ -35,22 +42,32 @@ fun initServer() {
     )
 
     ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY = Registry.register(
-        Registry.ENTITY_TYPE,
-        Identifier("chaoscraft", "workload_sheep"),
-        FabricEntityTypeBuilder.create(
+        Registry.ENTITY_TYPE, Identifier(CHAOSCRAFT, "workload_sheep"), FabricEntityTypeBuilder.create(
             SpawnGroup.CREATURE,
             ::WorkloadSheepEntity,
         ).dimensions(EntityDimensions.fixed(0.9f, 1.3f)).build()
     )
 
     FabricDefaultAttributeRegistry.register(
-        ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY,
-        SheepEntity.createSheepAttributes()
+        ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY, SheepEntity.createSheepAttributes()
+    )
+
+    ChaoscraftEntityType.NETWORK_CRYSTAL_ENTITY = Registry.register(
+        Registry.ENTITY_TYPE, Identifier(CHAOSCRAFT, "network_crystal"), FabricEntityTypeBuilder.create(
+            SpawnGroup.MISC,
+            ::NetworkCrystalEntity,
+        ).dimensions(EntityDimensions.fixed(2.0f, 2.0f)).build()
+    )
+
+    ChaoscraftItems.NETWORK_CRYSTAL = Registry.register(
+        Registry.ITEM,
+        Identifier(CHAOSCRAFT, "network_crystal"),
+        NetworkCrystalItem(Item.Settings().group(ItemGroup.MISC))
     )
 
     Registry.register(
         Registry.ITEM,
-        Identifier("chaoscraft", "resource_usage_glass"),
+        Identifier(CHAOSCRAFT, "resource_usage_glass"),
         ChaoscraftArmors.RESOURCE_USAGE_GLASS
     )
 }

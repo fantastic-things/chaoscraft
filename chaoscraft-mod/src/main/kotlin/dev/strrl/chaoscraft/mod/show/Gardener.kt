@@ -2,7 +2,7 @@ package dev.strrl.chaoscraft.mod.show
 
 import com.google.common.util.concurrent.RateLimiter
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
-import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
+import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
 import dev.strrl.chaoscraft.mod.show.zone.*
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
