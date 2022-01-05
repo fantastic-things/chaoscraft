@@ -4,10 +4,7 @@ import com.google.common.util.concurrent.RateLimiter
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
 import dev.strrl.chaoscraft.mod.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
-import dev.strrl.chaoscraft.mod.show.zone.ApplyZoneActions
-import dev.strrl.chaoscraft.mod.show.zone.CompositeZone
-import dev.strrl.chaoscraft.mod.show.zone.FenceBorder
-import dev.strrl.chaoscraft.mod.show.zone.FlatFloor
+import dev.strrl.chaoscraft.mod.show.zone.*
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -53,16 +50,29 @@ class Gardener(
 
     private fun preparePlayground(): List<Action> {
         val size = 20
-        val offset = -size / 2
+        val border = 1
+
+        val offsetOnX = 3
+        val offsetOnZ = -size / 2
+
+        val air = CompositeZone(
+            listOf(
+                AirZone(
+                    size - 2 * border, size - 2 * border, 1
+                ).withOffset(Position(offsetOnX + border, 0, offsetOnZ + border)), AirZone(
+                    size, size, 10
+                ).withOffset(Position(offsetOnX, 1, offsetOnZ))
+            )
+        )
 
         val floor = FlatFloor(
             size, size
-        ).withOffset(Position(2, -1, offset))
+        ).withOffset(Position(offsetOnX, -1, offsetOnZ))
 
         val fence = FenceBorder(
             size, size
-        ).withOffset(Position(2, 0, offset))
-        val zone = CompositeZone(listOf(floor, fence))
+        ).withOffset(Position(offsetOnX, 0, offsetOnZ))
+        val zone = CompositeZone(listOf(air, floor, fence))
         return ApplyZoneActions(
             serverWorld, Position.fromBlockPos(beaconBlockPos), zone
         ).actions()
