@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.damage.DamageSource
+import net.minecraft.entity.data.DataTracker
+import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.decoration.EndCrystalEntity
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.world.ServerWorld
@@ -20,11 +22,12 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         private const val BINDED_ENTITY = "binded_entity"
         private const val BEAM_TARGETS = "beam_targets"
         private const val FLOAT_HEIGHT = "float_height"
+        private val TRACKED_BEAM_TARGETS =
+            DataTracker.registerData(NetworkCrystalEntity::class.java, TrackedDataHandlerRegistry.STRING)
     }
 
-    private var bindedEntity: UUID? = null
+    private var bindedEntity: Entity? = null
     private var floatHeight: Float = 2.0f
-    private val beamTargets: MutableList<UUID> = mutableListOf()
 
     constructor(world: World, x: Double, y: Double, z: Double) : this(
         ChaoscraftEntityType.NETWORK_CRYSTAL_ENTITY, world
@@ -40,6 +43,10 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         this.floatHeight = floatHeight
     }
 
+    override fun initDataTracker() {
+        super.initDataTracker()
+        this.getDataTracker().startTracking(TRACKED_BEAM_TARGETS, "[]")
+    }
 
     private fun bindedPosition(): Vec3d {
         val entityOptional = fetchBindedEntity()
@@ -52,23 +59,20 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
     }
 
     fun updateBindedEntity(entity: Entity) {
-        this.bindedEntity = entity.uuid
+        this.bindedEntity = entity
     }
 
     fun fetchBindedEntity(): Optional<Entity> {
-        if (this.bindedEntity == null) {
-            return Optional.empty()
-        }
-        return Optional.ofNullable((this.world as ServerWorld).getEntity(this.bindedEntity))
+        return Optional.ofNullable(this.bindedEntity)
     }
 
     fun updateBeamTargets(targets: List<Entity>) {
-        this.beamTargets.clear()
-        this.beamTargets.addAll(targets.map { it.uuid })
+        this.getDataTracker().set(TRACKED_BEAM_TARGETS, OBJECT_MAPPER.writeValueAsString(targets.map { it.id }))
     }
 
     fun fetchBeamTargets(): List<Entity> {
-        return this.beamTargets.map { (this.world as ServerWorld).getEntity(it) }.filterNotNull()
+        val ids: List<Int> = OBJECT_MAPPER.readValue(this.getDataTracker().get(TRACKED_BEAM_TARGETS))
+        return ids.mapNotNull { this.world.getEntityById(it) }
     }
 
 
@@ -90,18 +94,22 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         this.remove(RemovalReason.KILLED)
     }
 
-    override fun writeNbt(nbt: NbtCompound): NbtCompound {
-        nbt.putString(BINDED_ENTITY, OBJECT_MAPPER.writeValueAsString(this.bindedEntity))
-        nbt.putString(BEAM_TARGETS, OBJECT_MAPPER.writeValueAsString(this.beamTargets))
-        nbt.putFloat(FLOAT_HEIGHT, this.floatHeight)
-        return super.writeNbt(nbt)
+    override fun readCustomDataFromNbt(nbt: NbtCompound) {
+        super.readCustomDataFromNbt(nbt)
+        val content = nbt.getString(BINDED_ENTITY)
+        if (content != "null" && content.isNotEmpty()) {
+            val bindedEntityUUID: UUID? = OBJECT_MAPPER.readValue(content)
+            this.bindedEntity = (this.world as ServerWorld).getEntity(bindedEntityUUID)
+        }
+        val entityIDs: List<Int> = OBJECT_MAPPER.readValue(nbt.getString(BEAM_TARGETS))
+        this.updateBeamTargets(entityIDs.mapNotNull { this.world.getEntityById(it) })
+        this.floatHeight = nbt.getFloat(FLOAT_HEIGHT)
     }
 
-    override fun readNbt(nbt: NbtCompound) {
-        this.bindedEntity = OBJECT_MAPPER.readValue(nbt.getString(BINDED_ENTITY))
-        val entities: List<UUID> = OBJECT_MAPPER.readValue(nbt.getString(BEAM_TARGETS))
-        this.beamTargets.addAll(entities)
-        this.floatHeight = nbt.getFloat(FLOAT_HEIGHT)
-        super.readNbt(nbt)
+    override fun writeCustomDataToNbt(nbt: NbtCompound) {
+        super.writeCustomDataToNbt(nbt)
+        nbt.putString(BINDED_ENTITY, OBJECT_MAPPER.writeValueAsString(this.bindedEntity?.uuid))
+        nbt.putString(BEAM_TARGETS, OBJECT_MAPPER.writeValueAsString(this.fetchBeamTargets().map { it.id }))
+        nbt.putFloat(FLOAT_HEIGHT, this.floatHeight)
     }
 }

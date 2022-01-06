@@ -203,8 +203,9 @@ class NetworkCrystalEntityRenderer(
         vertexConsumerProvider: VertexConsumerProvider,
         light: Int
     ) {
+        matrixStack.push()
         val m = target.x.toFloat() + 0.5f
-        val n = target.y.toFloat() + 0.5f
+        val n = target.y.toFloat()
         val o = target.z.toFloat() + 0.5f
         val p = (m.toDouble() - source.x).toFloat()
         val q = (n.toDouble() - source.y).toFloat()
@@ -213,6 +214,7 @@ class NetworkCrystalEntityRenderer(
         renderCrystalBeam(
             -p, -q + yOffset, -r, tickDelta, crystalAge, matrixStack, vertexConsumerProvider, light
         )
+        matrixStack.pop()
     }
 
     private fun getYOffset(crystal: EndCrystalEntity, tickDelta: Float): Float {
