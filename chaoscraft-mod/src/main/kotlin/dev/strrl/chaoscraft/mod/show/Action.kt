@@ -47,7 +47,7 @@ class ServerWorldsActionFactory(
                     if (!succeed) {
                         logger.warn("Failed to spawn network crystal for workload ${workload.namespacedName()}")
                     }
-                    sheep.networkCrystal = networkCrystal
+                    sheep.updateNetworkCrystal(networkCrystal)
 
                     networkCrystal.updateBeamTargets(otherCrystalEntity)
                     otherCrystalEntity.add(networkCrystal)
