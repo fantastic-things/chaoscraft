@@ -16,7 +16,7 @@ class NetworkCrystalItem(settings: Settings) : EndCrystalItem(settings) {
         if (entity is WorkloadSheepEntity) {
             val world = entity.world
             if (world is ServerWorld) {
-                val networkCrystal = NetworkCrystalEntity(world, entity, Random.nextDouble(2.0, 5.0))
+                val networkCrystal = NetworkCrystalEntity(world, entity, Random.nextDouble(2.0, 5.0).toFloat())
                 networkCrystal.setShowBottom(false)
                 val succeed = world.spawnEntity(networkCrystal)
                 if (!succeed) {

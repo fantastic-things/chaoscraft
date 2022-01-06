@@ -1,7 +1,10 @@
 package dev.strrl.chaoscraft.mod.entity
 
 import net.minecraft.client.model.*
-import net.minecraft.client.render.*
+import net.minecraft.client.render.Frustum
+import net.minecraft.client.render.OverlayTexture
+import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.entity.EnderDragonEntityRenderer
 import net.minecraft.client.render.entity.EntityRenderer
 import net.minecraft.client.render.entity.EntityRendererFactory
@@ -9,12 +12,15 @@ import net.minecraft.client.render.entity.model.EntityModelLayers
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.decoration.EndCrystalEntity
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.*
+import net.minecraft.util.math.MathHelper
+import net.minecraft.util.math.Quaternion
+import net.minecraft.util.math.Vec3d
+import net.minecraft.util.math.Vec3f
 import kotlin.math.sin
 
 class NetworkCrystalEntityRenderer(
     context: EntityRendererFactory.Context,
-) : EntityRenderer<EndCrystalEntity>(context) {
+) : EntityRenderer<NetworkCrystalEntity>(context) {
     private var core: ModelPart? = null
     private var frame: ModelPart? = null
     private var bottom: ModelPart? = null
@@ -63,16 +69,14 @@ class NetworkCrystalEntityRenderer(
             matrices.multiply(
                 Vec3f.POSITIVE_Y.getRadialQuaternion(
                     (-Math.atan2(
-                        dz.toDouble(),
-                        dx.toDouble()
+                        dz.toDouble(), dx.toDouble()
                     )).toFloat() - 1.5707964f
                 )
             )
             matrices.multiply(
                 Vec3f.POSITIVE_X.getRadialQuaternion(
                     (-Math.atan2(
-                        f.toDouble(),
-                        dy.toDouble()
+                        f.toDouble(), dy.toDouble()
                     )).toFloat() - 1.5707964f
                 )
             )
@@ -114,103 +118,101 @@ class NetworkCrystalEntityRenderer(
         this.bottom = modelPart.getChild("base")
     }
 
-    override fun getTexture(networkCrystalEntity: EndCrystalEntity?): Identifier {
-        return TEXTURE
-    }
-
     override fun shouldRender(
-        networkCrystalEntity: EndCrystalEntity,
-        frustum: Frustum?,
-        d: Double,
-        e: Double,
-        f: Double
+        networkCrystalEntity: NetworkCrystalEntity, frustum: Frustum?, d: Double, e: Double, f: Double
     ): Boolean {
         return super.shouldRender(networkCrystalEntity, frustum, d, e, f) || networkCrystalEntity.beamTarget != null
     }
 
     override fun render(
-        networkCrystalEntity: EndCrystalEntity,
-        f: Float,
-        g: Float,
+        networkCrystalEntity: NetworkCrystalEntity,
+        yaw: Float,
+        tickDelta: Float,
         matrixStack: MatrixStack,
         vertexConsumerProvider: VertexConsumerProvider,
-        i: Int
+        light: Int
     ) {
         matrixStack.push()
-        val h = getYOffset(networkCrystalEntity, g)
-        val j = (networkCrystalEntity.endCrystalAge.toFloat() + g) * 3.0f
+        val yOffset = getYOffset(networkCrystalEntity, tickDelta)
+        val yAngle = (networkCrystalEntity.endCrystalAge.toFloat() + tickDelta) * 3.0f
         val vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL)
         matrixStack.push()
         matrixStack.scale(2.0f, 2.0f, 2.0f)
         matrixStack.translate(0.0, -0.5, 0.0)
         val k = OverlayTexture.DEFAULT_UV
         if (networkCrystalEntity.shouldShowBottom()) {
-            bottom!!.render(matrixStack, vertexConsumer, i, k)
+            bottom!!.render(matrixStack, vertexConsumer, light, k)
         }
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j))
-        matrixStack.translate(0.0, (1.5f + h / 2.0f).toDouble(), 0.0)
+        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+        matrixStack.translate(0.0, (1.5f + yOffset / 2.0f).toDouble(), 0.0)
         matrixStack.multiply(
             Quaternion(
                 Vec3f(
-                    SINE_45_DEGREES,
-                    0.0f,
-                    SINE_45_DEGREES
+                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
                 ), 60.0f, true
             )
         )
-        frame!!.render(matrixStack, vertexConsumer, i, k)
+        frame!!.render(matrixStack, vertexConsumer, light, k)
         val l = 0.875f
         matrixStack.scale(0.875f, 0.875f, 0.875f)
         matrixStack.multiply(
             Quaternion(
                 Vec3f(
-                    SINE_45_DEGREES,
-                    0.0f,
-                    SINE_45_DEGREES
+                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
                 ), 60.0f, true
             )
         )
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j))
-        frame!!.render(matrixStack, vertexConsumer, i, k)
+        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+        frame!!.render(matrixStack, vertexConsumer, light, k)
         matrixStack.scale(0.875f, 0.875f, 0.875f)
         matrixStack.multiply(
             Quaternion(
                 Vec3f(
-                    SINE_45_DEGREES,
-                    0.0f,
-                    SINE_45_DEGREES
+                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
                 ), 60.0f, true
             )
         )
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j))
-        core!!.render(matrixStack, vertexConsumer, i, k)
+        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+        core!!.render(matrixStack, vertexConsumer, light, k)
         matrixStack.pop()
         matrixStack.pop()
-        val blockPos = BlockPos(networkCrystalEntity.x + 5, networkCrystalEntity.y + 5, networkCrystalEntity.z + 5)
-        if (blockPos != null) {
-            val m = blockPos.x.toFloat() + 0.5f
-            val n = blockPos.y.toFloat() + 0.5f
-            val o = blockPos.z.toFloat() + 0.5f
-            val p = (m.toDouble() - networkCrystalEntity.x).toFloat()
-            val q = (n.toDouble() - networkCrystalEntity.y).toFloat()
-            val r = (o.toDouble() - networkCrystalEntity.z).toFloat()
-            matrixStack.translate(p.toDouble(), q.toDouble(), r.toDouble())
-            val lightAbove = WorldRenderer.getLightmapCoordinates(
-                networkCrystalEntity!!.world,
-                BlockPos(networkCrystalEntity.pos).up()
-            )
-            renderCrystalBeam(
-                -p,
-                -q + h,
-                -r,
-                g,
-                networkCrystalEntity.endCrystalAge,
+
+        for (target in networkCrystalEntity.fetchBeamTargets()) {
+            renderNetworkBeam(
+                Vec3d(networkCrystalEntity.x, networkCrystalEntity.y, networkCrystalEntity.z),
+                Vec3d(target.x, target.y, target.z),
                 matrixStack,
+                yOffset,
+                tickDelta,
+                networkCrystalEntity.endCrystalAge,
                 vertexConsumerProvider,
-                lightAbove
+                light
             )
         }
-        super.render(networkCrystalEntity, f, g, matrixStack, vertexConsumerProvider, i)
+
+        super.render(networkCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light)
+    }
+
+    private fun renderNetworkBeam(
+        source: Vec3d,
+        target: Vec3d,
+        matrixStack: MatrixStack,
+        yOffset: Float,
+        tickDelta: Float,
+        crystalAge: Int,
+        vertexConsumerProvider: VertexConsumerProvider,
+        light: Int
+    ) {
+        val m = target.x.toFloat() + 0.5f
+        val n = target.y.toFloat() + 0.5f
+        val o = target.z.toFloat() + 0.5f
+        val p = (m.toDouble() - source.x).toFloat()
+        val q = (n.toDouble() - source.y).toFloat()
+        val r = (o.toDouble() - source.z).toFloat()
+        matrixStack.translate(p.toDouble(), q.toDouble(), r.toDouble())
+        renderCrystalBeam(
+            -p, -q + yOffset, -r, tickDelta, crystalAge, matrixStack, vertexConsumerProvider, light
+        )
     }
 
     private fun getYOffset(crystal: EndCrystalEntity, tickDelta: Float): Float {
@@ -218,6 +220,10 @@ class NetworkCrystalEntityRenderer(
         var g = MathHelper.sin(f * 0.2f) / 2.0f + 0.5f
         g = (g * g + g) * 0.4f
         return g - 1.4f
+    }
+
+    override fun getTexture(entity: NetworkCrystalEntity?): Identifier {
+        return TEXTURE
     }
 
 }

@@ -42,7 +42,7 @@ class ServerWorldsActionFactory(
                     spawnedEntities.add(sheep)
 
                     // spawn network crystal for sheep
-                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 5.0))
+                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 5.0).toFloat())
                     serverWorld.spawnEntity(networkCrystal)
                 }
 
