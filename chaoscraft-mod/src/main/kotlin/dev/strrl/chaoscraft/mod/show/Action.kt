@@ -42,7 +42,7 @@ class ServerWorldsActionFactory(
                     sheep.customName = Text.of(workload.namespacedName())
                     serverWorld.spawnEntity(sheep)
                     spawnedEntities.add(sheep)
-                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 5.0).toFloat())
+                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 10.0).toFloat())
                     val succeed = serverWorld.spawnEntity(networkCrystal)
                     if (!succeed) {
                         logger.warn("Failed to spawn network crystal for workload ${workload.namespacedName()}")

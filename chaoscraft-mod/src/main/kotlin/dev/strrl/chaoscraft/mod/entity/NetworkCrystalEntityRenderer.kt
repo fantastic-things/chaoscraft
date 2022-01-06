@@ -205,7 +205,7 @@ class NetworkCrystalEntityRenderer(
     ) {
         matrixStack.push()
         val m = target.x.toFloat() + 0.5f
-        val n = target.y.toFloat()
+        val n = target.y.toFloat() - 1f
         val o = target.z.toFloat() + 0.5f
         val p = (m.toDouble() - source.x).toFloat()
         val q = (n.toDouble() - source.y).toFloat()
@@ -220,7 +220,7 @@ class NetworkCrystalEntityRenderer(
     private fun getYOffset(crystal: EndCrystalEntity, tickDelta: Float): Float {
         val f = crystal.endCrystalAge.toFloat() + tickDelta
         var g = MathHelper.sin(f * 0.2f) / 2.0f + 0.5f
-        g = (g * g + g) * 0.4f
+        g = (g * g + g) * 0.1f
         return g - 1.4f
     }
 
