@@ -30,7 +30,6 @@ class ServerWorldsActionFactory(
             override fun run() {
                 val spawnedEntities = mutableListOf<Entity>()
 
-                val otherCrystalEntity: MutableList<Entity> = mutableListOf()
                 for (workload in workloads) {
                     val sheep = ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY!!.create(serverWorld)!!
                     sheep.setPos(
@@ -48,9 +47,6 @@ class ServerWorldsActionFactory(
                         logger.warn("Failed to spawn network crystal for workload ${workload.namespacedName()}")
                     }
                     sheep.updateNetworkCrystal(networkCrystal)
-
-                    networkCrystal.updateBeamTargets(otherCrystalEntity)
-                    otherCrystalEntity.add(networkCrystal)
                 }
 
                 val after = gardenBeaconBlockEntity.state.controlledEntityIds.toMutableSet()
