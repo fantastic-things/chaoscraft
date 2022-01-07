@@ -1,9 +1,12 @@
 package dev.strrl.chaoscraft.mod.show
 
 import com.google.common.util.concurrent.RateLimiter
+import dev.strrl.chaoscraft.api.Workload
+import dev.strrl.chaoscraft.grabber.HubbleNetworkTrafficGrabber
 import dev.strrl.chaoscraft.grabber.KubePodsGrabber
-import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
+import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
+import dev.strrl.chaoscraft.mod.entity.WorkloadSheepEntity
 import dev.strrl.chaoscraft.mod.show.zone.*
 import io.fabric8.kubernetes.client.DefaultKubernetesClient
 import kotlinx.coroutines.CoroutineScope
@@ -14,6 +17,8 @@ import net.minecraft.util.math.BlockPos
 import java.util.concurrent.Executors
 import kotlin.coroutines.CoroutineContext
 
+private val networkTrafficGrabber = HubbleNetworkTrafficGrabber()
+
 @Suppress("UnstableApiUsage")
 class Gardener(
     private val serverWorld: ServerWorld,
@@ -21,7 +26,10 @@ class Gardener(
 ) : CoroutineScope {
 
     private val rateLimiter = RateLimiter.create(0.5);
-    private val actionFactory = ServerWorldsActionFactory(serverWorld)
+    private val actionFactory = ServerWorldsActionFactory(
+        serverWorld,
+        networkTrafficGrabber,
+    )
     private var entityCache: GardenBeaconBlockEntity? = null
 
     companion object {
@@ -44,8 +52,42 @@ class Gardener(
 
             actions.addAll(spawnNewEntitiesForNotIntroducedWorkloads())
 
+            actions.addAll(createNetworkBeams())
+
             actions.forEach { it.run() }
         }
+    }
+
+    private fun createNetworkBeams(): List<Action> {
+        val blockEntityOptional =
+            this.serverWorld.getBlockEntity(this.beaconBlockPos, ChaoscraftEntityType.GARDEN_BEACON_BLOCK_ENTITY)
+        if (blockEntityOptional.isEmpty) {
+            return emptyList()
+        }
+        val blockEntity = blockEntityOptional.get()
+        val workloadSheeps =
+            blockEntity.state.controlledEntityIds.map { this.serverWorld.getEntity(it) as WorkloadSheepEntity }
+        val maps = workloadSheeps.associateBy {
+            val split = it.customName!!.string.split("/")
+            val namespace = split[0]
+            val name = split[1]
+            Workload(namespace, name)
+        }
+
+        for (traffic in networkTrafficGrabber.listTraffics()) {
+            val from = maps[traffic.from]
+            val to = maps[traffic.to]
+            val toNetworkCrystalOptional = to?.fetchNetworkCrystal()
+            from?.fetchNetworkCrystal()?.ifPresent { fromCrystal ->
+                val beamTargets = fromCrystal.fetchBeamTargets().toMutableList()
+                toNetworkCrystalOptional?.ifPresent { toCrystal ->
+                    beamTargets.add(toCrystal)
+                }
+                fromCrystal.updateBeamTargets(beamTargets)
+            }
+        }
+
+        return emptyList()
     }
 
     private fun preparePlayground(): List<Action> {
@@ -74,7 +116,7 @@ class Gardener(
         ).withOffset(Position(offsetOnX, 0, offsetOnZ))
         val zone = CompositeZone(listOf(air, floor, fence))
         return ApplyZoneActions(
-            serverWorld, Position.fromBlockPos(beaconBlockPos), zone
+            serverWorld, Position.fromBlockPos(beaconBlockPos), zone, actionFactory
         ).actions()
     }
 
@@ -95,7 +137,8 @@ class Gardener(
         val originState = fetchEntity().state
 
         val originWorkloads = originState.workloads
-        val newWorkloads = KubePodsGrabber(DefaultKubernetesClient()).listWorkloadsInNamespace("default").toSet()
+        val newWorkloads =
+            KubePodsGrabber(DefaultKubernetesClient()).listWorkloads().filter { it.namespace != "kube-system" }.toSet()
 
         if (originWorkloads != newWorkloads) {
             fetchEntity().state = originState.copy(workloads = newWorkloads)
