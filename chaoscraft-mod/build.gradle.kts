@@ -28,8 +28,11 @@ dependencies {
     val fabricKotlinVersion: String by project
     modImplementation("net.fabricmc:fabric-language-kotlin:$fabricKotlinVersion")
     api(project(":chaoscraft-api"))
-    api(project(":chaoscraft-datasource"))
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt"){
+    api(project(":chaoscraft-datasource")) {
+        exclude("com.google.guava", "guava")
+    }
+
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0-native-mt") {
         version {
             strictly("1.6.0-native-mt")
         }

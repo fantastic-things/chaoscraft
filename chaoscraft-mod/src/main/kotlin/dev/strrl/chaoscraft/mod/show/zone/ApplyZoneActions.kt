@@ -6,10 +6,12 @@ import dev.strrl.chaoscraft.mod.show.Position
 import dev.strrl.chaoscraft.mod.show.ServerWorldsActionFactory
 import net.minecraft.server.world.ServerWorld
 
+
 class ApplyZoneActions(
     private val serverWorld: ServerWorld,
     private val basePosition: Position,
     private val zone: Zone,
+    private val actionFactory: ServerWorldsActionFactory
 ) {
     fun actions(): List<Action> {
         val diff = mutableListOf<ExpectedBlock>()
@@ -20,11 +22,9 @@ class ApplyZoneActions(
                 diff.add(expectedBlock)
             }
         }
-        val factory = ServerWorldsActionFactory(serverWorld)
         return diff.map {
-            factory.setBlock(
-                it.position.relativeToAbsolute(basePosition).toBlockPos(),
-                it.type.toBlock()
+            actionFactory.setBlock(
+                it.position.relativeToAbsolute(basePosition).toBlockPos(), it.type.toBlock()
             )
         }
     }

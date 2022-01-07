@@ -19,9 +19,9 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
         return true
     }
 
-    val cpuUsage: Double = 10.0
+    val cpuUsage: Double = Random().nextDouble(10.0, 30.0)
     val cpuCapacity: Double = 100.0
-    val memoryUsage: Double = 10.0
+    val memoryUsage: Double = Random().nextDouble(40.0, 80.0)
     val memoryCapacity: Double = 100.0
 
     override fun initDataTracker() {
@@ -57,6 +57,7 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
             it.remove(RemovalReason.DISCARDED)
         }
     }
+
 
     companion object {
         val CPU_USAGE = "cpu_usage"

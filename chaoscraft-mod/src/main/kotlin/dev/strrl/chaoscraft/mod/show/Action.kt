@@ -1,6 +1,7 @@
 package dev.strrl.chaoscraft.mod.show
 
 import dev.strrl.chaoscraft.api.Workload
+import dev.strrl.chaoscraft.grabber.NetworkTrafficGrabber
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
 import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
@@ -16,8 +17,8 @@ import kotlin.random.Random
 interface Action : Runnable
 
 class ServerWorldsActionFactory(
-    private val serverWorld: ServerWorld
-
+    private val serverWorld: ServerWorld,
+    private val networkTrafficGrabber: NetworkTrafficGrabber,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
