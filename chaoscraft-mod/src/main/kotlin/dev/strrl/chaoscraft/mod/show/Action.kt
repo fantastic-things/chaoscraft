@@ -29,21 +29,24 @@ class ServerWorldsActionFactory(
         return object : Action {
             override fun run() {
                 val spawnedEntities = mutableListOf<Entity>()
+
                 for (workload in workloads) {
                     val sheep = ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY!!.create(serverWorld)!!
                     sheep.setPos(
-                        spawnPosition.x.toDouble() + Random.nextDouble(-1.0, 1.0),
+                        spawnPosition.x.toDouble() + Random.nextDouble(-3.0, 3.0),
                         spawnPosition.y.toDouble() + Random.nextDouble(0.0, 1.0),
-                        spawnPosition.z.toDouble() + Random.nextDouble(-1.0, 1.0)
+                        spawnPosition.z.toDouble() + Random.nextDouble(-3.0, 3.0)
                     )
                     sheep.isCustomNameVisible = true
                     sheep.customName = Text.of(workload.namespacedName())
                     serverWorld.spawnEntity(sheep)
                     spawnedEntities.add(sheep)
-
-                    // spawn network crystal for sheep
-                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 5.0))
-                    serverWorld.spawnEntity(networkCrystal)
+                    val networkCrystal = NetworkCrystalEntity(serverWorld, sheep, Random.nextDouble(2.0, 10.0).toFloat())
+                    val succeed = serverWorld.spawnEntity(networkCrystal)
+                    if (!succeed) {
+                        logger.warn("Failed to spawn network crystal for workload ${workload.namespacedName()}")
+                    }
+                    sheep.updateNetworkCrystal(networkCrystal)
                 }
 
                 val after = gardenBeaconBlockEntity.state.controlledEntityIds.toMutableSet()
