@@ -7,7 +7,7 @@ import net.minecraft.block.Material
 
 class ChaoscraftBlocks {
     companion object {
-        val PLAYGROUND_BEACON_BLOCK: Block =
+        val GARDEN_BEACON_BLOCK: Block =
             GardenBeaconBlock(FabricBlockSettings.of(Material.STONE).hardness(2.0f))
     }
 }

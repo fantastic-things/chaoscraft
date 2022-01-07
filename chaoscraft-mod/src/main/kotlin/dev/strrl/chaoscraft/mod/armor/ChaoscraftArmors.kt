@@ -14,5 +14,11 @@ class ChaoscraftArmors {
                 EquipmentSlot.HEAD,
                 Item.Settings().group(CHAOSCRAFT_MOD_GROUP)
             )
+        val CRYSTAL_GLASS: Item =
+            ArmorItem(
+                ArmorMaterials.DIAMOND,
+                EquipmentSlot.HEAD,
+                Item.Settings().group(CHAOSCRAFT_MOD_GROUP)
+            )
     }
 }
