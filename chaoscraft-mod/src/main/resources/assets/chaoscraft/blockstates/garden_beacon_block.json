@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "chaoscraft:block/garden_beacon_block" }
+  }
+}

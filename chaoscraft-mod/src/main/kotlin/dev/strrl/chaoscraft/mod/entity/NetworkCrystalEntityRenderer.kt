@@ -1,5 +1,7 @@
 package dev.strrl.chaoscraft.mod.entity
 
+import dev.strrl.chaoscraft.mod.armor.ChaoscraftArmors
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.model.*
 import net.minecraft.client.render.Frustum
 import net.minecraft.client.render.OverlayTexture
@@ -132,65 +134,67 @@ class NetworkCrystalEntityRenderer(
         vertexConsumerProvider: VertexConsumerProvider,
         light: Int
     ) {
-        matrixStack.push()
-        val yOffset = getYOffset(networkCrystalEntity, tickDelta)
-        val yAngle = (networkCrystalEntity.endCrystalAge.toFloat() + tickDelta) * 3.0f
-        val vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL)
-        matrixStack.push()
-        matrixStack.scale(2.0f, 2.0f, 2.0f)
-        matrixStack.translate(0.0, -0.5, 0.0)
-        val k = OverlayTexture.DEFAULT_UV
-        if (networkCrystalEntity.shouldShowBottom()) {
-            bottom!!.render(matrixStack, vertexConsumer, light, k)
-        }
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
-        matrixStack.translate(0.0, (1.5f + yOffset / 2.0f).toDouble(), 0.0)
-        matrixStack.multiply(
-            Quaternion(
-                Vec3f(
-                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
-                ), 60.0f, true
+        if (MinecraftClient.getInstance().player!!.armorItems.any { it.item == ChaoscraftArmors.CRYSTAL_GLASS }) {
+            matrixStack.push()
+            val yOffset = getYOffset(networkCrystalEntity, tickDelta)
+            val yAngle = (networkCrystalEntity.endCrystalAge.toFloat() + tickDelta) * 3.0f
+            val vertexConsumer = vertexConsumerProvider.getBuffer(END_CRYSTAL)
+            matrixStack.push()
+            matrixStack.scale(2.0f, 2.0f, 2.0f)
+            matrixStack.translate(0.0, -0.5, 0.0)
+            val k = OverlayTexture.DEFAULT_UV
+            if (networkCrystalEntity.shouldShowBottom()) {
+                bottom!!.render(matrixStack, vertexConsumer, light, k)
+            }
+            matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+            matrixStack.translate(0.0, (1.5f + yOffset / 2.0f).toDouble(), 0.0)
+            matrixStack.multiply(
+                Quaternion(
+                    Vec3f(
+                        SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
+                    ), 60.0f, true
+                )
             )
-        )
-        frame!!.render(matrixStack, vertexConsumer, light, k)
-        val l = 0.875f
-        matrixStack.scale(0.875f, 0.875f, 0.875f)
-        matrixStack.multiply(
-            Quaternion(
-                Vec3f(
-                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
-                ), 60.0f, true
+            frame!!.render(matrixStack, vertexConsumer, light, k)
+            val l = 0.875f
+            matrixStack.scale(0.875f, 0.875f, 0.875f)
+            matrixStack.multiply(
+                Quaternion(
+                    Vec3f(
+                        SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
+                    ), 60.0f, true
+                )
             )
-        )
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
-        frame!!.render(matrixStack, vertexConsumer, light, k)
-        matrixStack.scale(0.875f, 0.875f, 0.875f)
-        matrixStack.multiply(
-            Quaternion(
-                Vec3f(
-                    SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
-                ), 60.0f, true
+            matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+            frame!!.render(matrixStack, vertexConsumer, light, k)
+            matrixStack.scale(0.875f, 0.875f, 0.875f)
+            matrixStack.multiply(
+                Quaternion(
+                    Vec3f(
+                        SINE_45_DEGREES, 0.0f, SINE_45_DEGREES
+                    ), 60.0f, true
+                )
             )
-        )
-        matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
-        core!!.render(matrixStack, vertexConsumer, light, k)
-        matrixStack.pop()
-        matrixStack.pop()
+            matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(yAngle))
+            core!!.render(matrixStack, vertexConsumer, light, k)
+            matrixStack.pop()
+            matrixStack.pop()
 
-        for (target in networkCrystalEntity.fetchBeamTargets()) {
-            renderNetworkBeam(
-                Vec3d(networkCrystalEntity.x, networkCrystalEntity.y, networkCrystalEntity.z),
-                Vec3d(target.x, target.y, target.z),
-                matrixStack,
-                yOffset,
-                tickDelta,
-                networkCrystalEntity.endCrystalAge,
-                vertexConsumerProvider,
-                light
-            )
-        }
+            for (target in networkCrystalEntity.fetchBeamTargets()) {
+                renderNetworkBeam(
+                    Vec3d(networkCrystalEntity.x, networkCrystalEntity.y, networkCrystalEntity.z),
+                    Vec3d(target.x, target.y, target.z),
+                    matrixStack,
+                    yOffset,
+                    tickDelta,
+                    networkCrystalEntity.endCrystalAge,
+                    vertexConsumerProvider,
+                    light
+                )
+            }
 
-        super.render(networkCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light)
+            super.render(networkCrystalEntity, yaw, tickDelta, matrixStack, vertexConsumerProvider, light)
+        }
     }
 
     private fun renderNetworkBeam(
