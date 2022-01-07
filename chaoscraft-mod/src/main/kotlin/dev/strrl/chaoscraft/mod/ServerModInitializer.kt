@@ -7,6 +7,7 @@ import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
 import dev.strrl.chaoscraft.mod.entity.WorkloadSheepEntity
 import dev.strrl.chaoscraft.mod.item.ChaoscraftItems
 import dev.strrl.chaoscraft.mod.item.NetworkCrystalItem
+import dev.strrl.chaoscraftmod.client.FABRIC_BLOCK
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricEntityTypeBuilder
@@ -26,18 +27,18 @@ val CHAOSCRAFT_MOD_GROUP: ItemGroup = FabricItemGroupBuilder.create(Identifier("
 
 fun initServer() {
     Registry.register(
-        Registry.BLOCK, Identifier(CHAOSCRAFT, "playground_beacon"), ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK
+        Registry.BLOCK, Identifier(CHAOSCRAFT, "garden_beacon_block"), ChaoscraftBlocks.GARDEN_BEACON_BLOCK
     )
 
-    ChaoscraftItems.PLAYGROUND_BEACON_BLOCK = Registry.register(
-        Registry.ITEM, Identifier(CHAOSCRAFT, "playground_beacon"), BlockItem(
-            ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK, Item.Settings().group(CHAOSCRAFT_MOD_GROUP)
+    ChaoscraftItems.GARDEN_BEACON_BLOCK = Registry.register(
+        Registry.ITEM, Identifier(CHAOSCRAFT, "garden_beacon_block"), BlockItem(
+            ChaoscraftBlocks.GARDEN_BEACON_BLOCK, Item.Settings().group(CHAOSCRAFT_MOD_GROUP)
         )
     )
     ChaoscraftEntityType.GARDEN_BEACON_BLOCK_ENTITY = Registry.register(
         Registry.BLOCK_ENTITY_TYPE,
-        "chaoscraft:playground_beacon_entity",
-        FabricBlockEntityTypeBuilder.create(::GardenBeaconBlockEntity, ChaoscraftBlocks.PLAYGROUND_BEACON_BLOCK)
+        "chaoscraft:garden_beacon_entity",
+        FabricBlockEntityTypeBuilder.create(::GardenBeaconBlockEntity, ChaoscraftBlocks.GARDEN_BEACON_BLOCK)
             .build(null)
     )
 
@@ -69,5 +70,10 @@ fun initServer() {
         Registry.ITEM,
         Identifier(CHAOSCRAFT, "resource_usage_glass"),
         ChaoscraftArmors.RESOURCE_USAGE_GLASS
+    )
+    Registry.register(
+        Registry.ITEM,
+        Identifier(CHAOSCRAFT, "crystal_glass"),
+        ChaoscraftArmors.CRYSTAL_GLASS
     )
 }
