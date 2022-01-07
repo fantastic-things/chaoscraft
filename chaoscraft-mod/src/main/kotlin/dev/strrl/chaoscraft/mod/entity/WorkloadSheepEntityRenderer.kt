@@ -37,7 +37,7 @@ class WorkloadSheepEntityRenderer(
         super.render(entity, f, g, matrixStack, vertexConsumerProvider, light)
         if (MinecraftClient.getInstance().player!!.armorItems.any { it.item == ChaoscraftArmors.RESOURCE_USAGE_GLASS }) {
             val usagePercentage = entity.cpuUsage / entity.cpuCapacity
-            val usageRender = dev.strrl.chaoscraft.mod.show.UsageRender("usage", usagePercentage)
+            val usageRender = dev.strrl.chaoscraft.mod.show.UsageRender("CPU", usagePercentage)
             val usageText = usageRender.render()
             val text = net.minecraft.text.Text.of(usageText).copy()
             text.style = net.minecraft.text.Style.EMPTY.withColor(0xe0766e).withBold(true).withFormatting()
@@ -47,7 +47,7 @@ class WorkloadSheepEntityRenderer(
             matrixStack.pop()
 
             val memoryPercentage = entity.memoryUsage / entity.memoryCapacity
-            val memoryRender = dev.strrl.chaoscraft.mod.show.MemoryRender("memory", memoryPercentage)
+            val memoryRender = dev.strrl.chaoscraft.mod.show.MemoryRender("Memory", memoryPercentage)
             val memoryText = memoryRender.render()
             val anotherText = net.minecraft.text.Text.of(memoryText).copy()
             anotherText.style = net.minecraft.text.Style.EMPTY.withColor(0x6e94e0).withBold(true)

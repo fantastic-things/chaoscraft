@@ -41,6 +41,11 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         this.updateBindedEntity(parent)
         this.setShowBottom(false)
         this.updateFloatHeight(floatHeight)
+        this.setPos(
+            parent.x,
+            parent.y + floatHeight,
+            parent.z
+        )
     }
 
     private fun updateFloatHeight(floatHeight: Float) {

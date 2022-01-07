@@ -138,7 +138,10 @@ class Gardener(
 
         val originWorkloads = originState.workloads
         val newWorkloads =
-            KubePodsGrabber(DefaultKubernetesClient()).listWorkloads().filter { it.namespace != "kube-system" }.toSet()
+            KubePodsGrabber(DefaultKubernetesClient()).listWorkloads()
+//                .filter { it.namespace != "kube-system" }
+                .filter { it.namespace == "default" }
+                .toSet()
 
         if (originWorkloads != newWorkloads) {
             fetchEntity().state = originState.copy(workloads = newWorkloads)
