@@ -1,0 +1,11 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: "podkill-{NAME}"
+  namespace: "{NAMESPACE}"
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    "{NAMESPACE}":
+      "{NAME}"
