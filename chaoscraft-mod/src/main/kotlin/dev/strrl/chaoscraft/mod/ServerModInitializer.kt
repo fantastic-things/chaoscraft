@@ -7,14 +7,12 @@ import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
 import dev.strrl.chaoscraft.mod.entity.WorkloadSheepEntity
 import dev.strrl.chaoscraft.mod.item.ChaoscraftItems
 import dev.strrl.chaoscraft.mod.item.NetworkCrystalItem
-import dev.strrl.chaoscraftmod.client.FABRIC_BLOCK
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricEntityTypeBuilder
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.entity.EntityDimensions
 import net.minecraft.entity.SpawnGroup
-import net.minecraft.entity.passive.SheepEntity
 import net.minecraft.item.*
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
@@ -50,7 +48,8 @@ fun initServer() {
     )
 
     FabricDefaultAttributeRegistry.register(
-        ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY, SheepEntity.createSheepAttributes()
+        ChaoscraftEntityType.WORKLOAD_SHEEP_ENTITY,
+        WorkloadSheepEntity.createWorkloadSheepSheepAttributes()
     )
 
     ChaoscraftEntityType.NETWORK_CRYSTAL_ENTITY = Registry.register(

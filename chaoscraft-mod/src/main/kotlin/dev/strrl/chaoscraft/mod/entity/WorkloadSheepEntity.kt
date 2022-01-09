@@ -2,6 +2,8 @@ package dev.strrl.chaoscraft.mod.entity
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.minecraft.entity.EntityType
+import net.minecraft.entity.attribute.DefaultAttributeContainer
+import net.minecraft.entity.attribute.EntityAttributes
 import net.minecraft.entity.damage.DamageSource
 import net.minecraft.entity.data.DataTracker
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
@@ -71,5 +73,10 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
             WorkloadSheepEntity::class.java,
             TrackedDataHandlerRegistry.INTEGER
         )
+
+        fun createWorkloadSheepSheepAttributes(): DefaultAttributeContainer.Builder {
+            return createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 999.99)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1)
+        }
     }
 }
