@@ -2,6 +2,8 @@ package dev.strrl.chaoscraft.mod
 
 import dev.strrl.chaoscraft.mod.armor.ChaoscraftArmors
 import dev.strrl.chaoscraft.mod.block.GardenBeaconBlockEntity
+import dev.strrl.chaoscraft.mod.enchantment.ChaosCraftEnchantment
+import dev.strrl.chaoscraft.mod.enchantment.NetworkBlackHoleEnchantment
 import dev.strrl.chaoscraft.mod.entity.ChaoscraftEntityType
 import dev.strrl.chaoscraft.mod.entity.NetworkCrystalEntity
 import dev.strrl.chaoscraft.mod.entity.WorkloadSheepEntity
@@ -74,5 +76,11 @@ fun initServer() {
         Registry.ITEM,
         Identifier(CHAOSCRAFT, "crystal_glass"),
         ChaoscraftArmors.CRYSTAL_GLASS
+    )
+
+    ChaosCraftEnchantment.NETWORK_BLACK_HOLE = Registry.register(
+        Registry.ENCHANTMENT,
+        Identifier(CHAOSCRAFT, "network_black_hole"),
+        NetworkBlackHoleEnchantment()
     )
 }
