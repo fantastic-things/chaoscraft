@@ -68,10 +68,7 @@ class Gardener(
         val workloadSheeps =
             blockEntity.state.controlledEntityIds.map { this.serverWorld.getEntity(it) as WorkloadSheepEntity }
         val maps = workloadSheeps.associateBy {
-            val split = it.customName!!.string.split("/")
-            val namespace = split[0]
-            val name = split[1]
-            Workload(namespace, name)
+            Workload(it.fetchWorkloadNamespace(), it.fetchWorkloadName())
         }
 
         for (traffic in networkTrafficGrabber.listTraffics()) {

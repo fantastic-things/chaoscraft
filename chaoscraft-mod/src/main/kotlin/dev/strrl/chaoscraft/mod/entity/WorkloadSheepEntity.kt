@@ -1,6 +1,7 @@
 package dev.strrl.chaoscraft.mod.entity
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import dev.strrl.chaoscraft.chaos.PodKill
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.attribute.DefaultAttributeContainer
 import net.minecraft.entity.attribute.EntityAttributes
@@ -60,8 +61,25 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
         }
     }
 
+    override fun damage(source: DamageSource, amount: Float): Boolean {
+        PodKill.killPod(
+            fetchWorkloadNamespace(),
+            fetchWorkloadName()
+        )
+        return super.damage(source, amount)
+    }
+
+    fun fetchWorkloadNamespace(): String {
+        return customName!!.string.split("/")[0]
+    }
+
+    fun fetchWorkloadName(): String {
+        return customName!!.string.split("/")[1]
+    }
+
 
     companion object {
+        val CONST_HEALTH = 999.99f
         val CPU_USAGE = "cpu_usage"
         val CPU_CAPACITY = "cpu_capacity"
         val MEMORY_USAGE = "memory_usage"
@@ -75,7 +93,7 @@ class WorkloadSheepEntity(entityType: EntityType<out SheepEntity>?, world: World
         )
 
         fun createWorkloadSheepSheepAttributes(): DefaultAttributeContainer.Builder {
-            return createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 999.99)
+            return createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, CONST_HEALTH.toDouble())
                 .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.1)
         }
     }
