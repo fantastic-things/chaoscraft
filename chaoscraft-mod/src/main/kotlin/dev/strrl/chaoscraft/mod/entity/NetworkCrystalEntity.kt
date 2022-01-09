@@ -5,9 +5,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.damage.DamageSource
+import net.minecraft.entity.damage.EntityDamageSource
 import net.minecraft.entity.data.DataTracker
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.decoration.EndCrystalEntity
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.Items
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
@@ -21,12 +24,16 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         private const val BINDED_ENTITY = "binded_entity"
         private const val BEAM_TARGETS = "beam_targets"
         private const val FLOAT_HEIGHT = "float_height"
+        private const val NETWORK_DISABLED = "network_disabled"
+
         private val TRACKED_BEAM_TARGETS =
             DataTracker.registerData(NetworkCrystalEntity::class.java, TrackedDataHandlerRegistry.STRING)
         private val TRACKED_BINDED_ENTITY =
             DataTracker.registerData(NetworkCrystalEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
         private val TRACKED_FLOAT_HEIGHT =
             DataTracker.registerData(NetworkCrystalEntity::class.java, TrackedDataHandlerRegistry.FLOAT)
+        private val TRACKED_NETWORK_DISABLED =
+            DataTracker.registerData(NetworkCrystalEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
     }
 
     constructor(world: World, x: Double, y: Double, z: Double) : this(
@@ -61,6 +68,7 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         this.getDataTracker().startTracking(TRACKED_BEAM_TARGETS, "[]")
         this.getDataTracker().startTracking(TRACKED_BINDED_ENTITY, 0)
         this.getDataTracker().startTracking(TRACKED_FLOAT_HEIGHT, 2.0f)
+        this.getDataTracker().startTracking(TRACKED_NETWORK_DISABLED, false)
     }
 
     private fun bindedPosition(): Vec3d {
@@ -95,6 +103,13 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         return ids.mapNotNull { this.world.getEntityById(it) }
     }
 
+    fun fetchNetworkDisabled(): Boolean {
+        return this.getDataTracker().get(TRACKED_NETWORK_DISABLED)
+    }
+
+    fun updateNetworkDisabled(v: Boolean) {
+        this.getDataTracker().set(TRACKED_NETWORK_DISABLED, v)
+    }
 
     override fun getPos(): Vec3d {
         val expected = this.bindedPosition()
@@ -106,6 +121,15 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
     }
 
     override fun damage(source: DamageSource?, amount: Float): Boolean {
+        if (source is EntityDamageSource) {
+            if (source.attacker is PlayerEntity) {
+                val player = source.attacker as PlayerEntity
+                if (player.offHandStack.item == Items.DIAMOND_SWORD) {
+                    return true
+                }
+            }
+        }
+
         this.kill()
         return true
     }
@@ -119,6 +143,7 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         nbt.putString(BEAM_TARGETS, OBJECT_MAPPER.writeValueAsString(this.fetchBeamTargets().map { it.id }))
         nbt.putInt(BINDED_ENTITY, this.getDataTracker().get(TRACKED_BINDED_ENTITY))
         nbt.putFloat(FLOAT_HEIGHT, this.fetchFloatHeight())
+        nbt.putBoolean(NETWORK_DISABLED, this.getDataTracker().get(TRACKED_NETWORK_DISABLED))
     }
 
     override fun readCustomDataFromNbt(nbt: NbtCompound) {
@@ -127,6 +152,7 @@ class NetworkCrystalEntity(entityType: EntityType<out EndCrystalEntity>?, world:
         this.updateBeamTargets(entityIDs.mapNotNull { this.world.getEntityById(it) })
         this.getDataTracker().set(TRACKED_BINDED_ENTITY, nbt.getInt(BINDED_ENTITY))
         this.updateFloatHeight(nbt.getFloat(FLOAT_HEIGHT))
+        this.getDataTracker().set(TRACKED_NETWORK_DISABLED, nbt.getBoolean(NETWORK_DISABLED))
     }
 
 }
