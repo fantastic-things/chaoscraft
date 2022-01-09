@@ -1,11 +1,12 @@
 apiVersion: chaos-mesh.org/v1alpha1
-kind: PodChaos
+kind: NetworkChaos
 metadata:
-  name: "podkill-{NAME}"
+  name: "network-black-hole-{NAME}"
   namespace: "{NAMESPACE}"
 spec:
-  action: pod-kill
+  action: partition
   mode: one
   selector:
     "{NAMESPACE}":
-      "{NAME}"
+    - "{NAME}"
+  direction: both
