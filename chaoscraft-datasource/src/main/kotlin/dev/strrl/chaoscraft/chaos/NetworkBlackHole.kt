@@ -8,7 +8,7 @@ metadata:
   namespace: "{NAMESPACE}"
 spec:
   action: partition
-  mode: one
+  mode: all
   selector:
     pods:
       "{NAMESPACE}":
