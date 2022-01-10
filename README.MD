@@ -2,6 +2,18 @@
 
 chaoscraft is team FuwaFuwaTime/滑滑蛋's project for TiDB Hackathon 2021.
 
+## Preview
+
+Watch video: [youtube](https://www.youtube.com/watch?v=56jhtxOJxro)
+
+Preview:
+
+![Pods](./images/image-1.png)
+
+![Resource Usage](./images/image-2.png)
+
+![Network Traffic](./images/image-3.png)
+
 ## Proposal
 
 Build an observer system and chaos experiment control system for any kubernetes workload.
