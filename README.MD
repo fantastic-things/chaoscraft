@@ -1,5 +1,7 @@
 # chaoscraft
 
+[![Build Latest Mod Jar](https://github.com/fantastic-things/chaoscraft/actions/workflows/build-latest-mod-jar.yaml/badge.svg?branch=main&event=push)](https://github.com/fantastic-things/chaoscraft/actions/workflows/build-latest-mod-jar.yaml)
+
 chaoscraft is team FuwaFuwaTime/滑滑蛋's project for TiDB Hackathon 2021.
 
 ## Preview
