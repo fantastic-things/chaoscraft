@@ -26,3 +26,8 @@ ext["grpcVersion"] = "1.39.0" // need to wait for grpc kotlin to move past this
 ext["grpcKotlinVersion"] = "1.2.0" // CURRENT_GRPC_KOTLIN_VERSION
 ext["protobufVersion"] = "3.19.1"
 ext["coroutinesVersion"] = "1.5.2"
+
+extensions.findByName("buildScan")?.withGroovyBuilder {
+    setProperty("termsOfServiceUrl", "https://gradle.com/terms-of-service")
+    setProperty("termsOfServiceAgree", "yes")
+}
