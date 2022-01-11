@@ -29,7 +29,5 @@ jobs:
         ./gradlew build --scan
     - name: Upload the jar
       uses: actions/upload-artifact@v2
-      env:
-        JAVA_OPTS: -Xmx4g
       with:
         path: chaoscraft-mod/out/libs/*
