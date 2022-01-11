@@ -49,7 +49,7 @@ java {
 protobuf {
     protoc {
         // The artifact spec for the Protobuf Compiler
-        artifact = "com.google.protobuf:protoc:3.19.1"
+        artifact = "com.google.protobuf:protoc:3.19.3"
     }
     plugins {
         // Optional: an artifact spec for a protoc plugin, with "grpc" as
