@@ -13,7 +13,7 @@ repositories {
 dependencies {
     api(project(":chaoscraft-api"))
     api(project(":cilium-proto"))
-    api("io.fabric8:kubernetes-client:5.12.0")
+    api("io.fabric8:kubernetes-client:6.0.0")
     implementation(kotlin("stdlib"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
