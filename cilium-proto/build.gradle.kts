@@ -17,7 +17,7 @@ dependencies {
     implementation(kotlin("stdlib"))
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    api("com.google.protobuf:protobuf-java:3.21.12")
+    api("com.google.protobuf:protobuf-java:3.22.0")
     api("io.grpc:grpc-all:1.52.1")
     api("javax.annotation:javax.annotation-api:1.3.2")
 
