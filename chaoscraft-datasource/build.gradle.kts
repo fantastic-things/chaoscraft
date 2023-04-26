@@ -15,7 +15,7 @@ dependencies {
     api(project(":cilium-proto"))
     api("io.fabric8:kubernetes-client:6.4.1")
     implementation(kotlin("stdlib"))
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
